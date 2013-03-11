@@ -9,6 +9,7 @@ public class Mancala {
 	public static void main(String[] args) {
 		new Mancala().play(new MockIO());
 	}
+
 	public void play(MockIO io) {
 		io.println("+----+-------+-------+-------+-------+-------+-------+----+");
 		io.println("| P2 | 6[ 4] | 5[ 4] | 4[ 4] | 3[ 4] | 2[ 4] | 1[ 4] |  0 |");
