@@ -1,7 +1,5 @@
 package mancala;
 
-import java.util.Arrays;
-
 import utility.MockIO;
 
 /**
@@ -13,37 +11,20 @@ public class Mancala {
 	}
 
 	public void play(MockIO io) {
-		int[] player1 = new int[7];
-		int[] player2 = new int[7];
-		
-		Arrays.fill(player1, 4);
-		Arrays.fill(player2, 4);
-		
-		player1[0] = 0;
-		player2[0] = 0;
-		
-		int[][] players = {player1, player2};
-		int[] currentPlayer = player1;
-		int[] otherPlayer = player2;
+		Player[] players = { new Player("1", 7), new Player("2", 7) };
+		int currentPlayer = 0;
 
-		int turn = 0;
-				
-		while(true) {	
-			if (checkWon(currentPlayer))
-				break;
-			
-			int command = io.readInteger(">Player " + (turn + 1) + "'s turn - Specify house number or 'q' to quit:\n<", 1, 6, -1, "q");
-			
+		while (true) {
+			Player player = players[currentPlayer];
+
+			int command = io.readInteger(">Player " + player.getName()
+					+ "'s turn - Specify house number or 'q' to quit:\n<", 1,
+					6, -1, "q");
+
 			if (command == -1)
 				break;
-			
-			int seeds = currentPlayer[command];
-			currentPlayer[command] = 0;
-			
-			
-			otherPlayer = currentPlayer;
-			turn = turn == 0 ? 1 : 1;
-			currentPlayer = players[turn];
+
+			currentPlayer = currentPlayer == 0 ? 1 : 1;
 		}
 	}
 
@@ -52,7 +33,7 @@ public class Mancala {
 			if (board[i] != 0)
 				return false;
 		}
-						
+
 		return true;
 	}
 }

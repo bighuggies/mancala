@@ -1,7 +1,7 @@
 package mancala;
 
 public class Board {
-	public Board(int numPlayers, int housesPerPlayer) {
-
+	public Board(int numPlayers, int housesPerPlayer, int storesPerPlayer) {
+		
 	}
 }

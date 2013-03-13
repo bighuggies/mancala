@@ -1,30 +1,36 @@
 package mancala;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import java.util.Arrays;
 
 public class Player {
+	private String _name;
 	private SeedHolder[] _stores;
-	
-	public Player(SeedHolder[] stores) {
-		this._stores = stores;
-	}
-	
-	public int distributeSeeds(int amount) {
-		for(SeedHolder s : this._stores) {
-			s.addSeeds(1);
-			amount =- 1;
-			
-			if (amount == 0)
-				break;
+
+	public Player(String name, int numHolders) {
+		this._name = name;
+		this._stores = new SeedHolder[numHolders];
+
+		for (int i = 0; i < numHolders - 1; i++) {
+			this._stores[i] = new House(this);
 		}
-		
-		return amount;
+
+		this._stores[numHolders] = new Store(this);
 	}
-	
-	public int distributeSeeds(int amount, int startingHouse) {
-		throw new NotImplementedException();
+
+	public String getName() {
+		return this._name;
 	}
-	
-	public void transferSeeds(int amount, int depositHouse) {
+
+	public SeedHolder[] getHouses() {
+		return (SeedHolder[]) Arrays.asList(_stores)
+				.subList(0, _stores.length - 2).toArray();
+	}
+
+	public SeedHolder getStore() {
+		return _stores[_stores.length - 1];
+	}
+
+	public SeedHolder getHouse(int index) {
+		return this._stores[index];
 	}
 }
