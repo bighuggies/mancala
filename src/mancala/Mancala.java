@@ -14,16 +14,19 @@ public class Mancala {
 
 	public void play(MockIO io) {
 		Events dispatcher = new Events();
-		Player[] players = { new Player("1", 7), new Player("2", 7) };
+		Player[] players = { new Player("1"), new Player("2") };
+		Board board = new Board(players);
+
+		dispatcher.listen(Command.class, board);
 		int currentPlayer = 0;
 
 		while (true) {
 			Player player = players[currentPlayer];
 
-			int command = io.readInteger(">Player " + player.getName()
+			int command = io.readInteger(">Player " + player.name
 					+ "'s turn - Specify house number or 'q' to quit:\n<", 1,
 					6, -1, "q");
-			
+
 			dispatcher.notify(new Command(player, command));
 
 			if (command == -1)
