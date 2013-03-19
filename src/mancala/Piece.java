@@ -1,19 +1,19 @@
 package mancala;
 
-public abstract class SeedHolder {
+public abstract class Piece {
 	private int _seeds = 0;
 	private Player _owner;
 	
-	public SeedHolder(Player owner) {
+	public Piece(Player owner) {
 		this._owner = owner;
 	}
 	
-	public int takeSeedsFrom(SeedHolder seedHolder) {
-		return this.takeSeedsFrom(seedHolder, seedHolder.countSeeds());
+	public int takeSeedsFrom(Piece piece) {
+		return this.takeSeedsFrom(piece, piece.countSeeds());
 	}
 	
-	public int takeSeedsFrom(SeedHolder seedHolder, int seeds) {
-		return this.putSeeds(seedHolder.takeSeeds(seeds));
+	public int takeSeedsFrom(Piece piece, int seeds) {
+		return this.putSeeds(piece.takeSeeds(seeds));
 	}
 
 	public int takeSeeds() {

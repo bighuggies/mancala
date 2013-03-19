@@ -1,6 +1,8 @@
 package mancala;
 
 import utility.MockIO;
+import events.Command;
+import events.Events;
 
 /**
  * This class is the starting point for SOFTENG 701 Assignment 1.1 in 2013.
@@ -11,6 +13,7 @@ public class Mancala {
 	}
 
 	public void play(MockIO io) {
+		Events dispatcher = new Events();
 		Player[] players = { new Player("1", 7), new Player("2", 7) };
 		int currentPlayer = 0;
 
@@ -20,6 +23,8 @@ public class Mancala {
 			int command = io.readInteger(">Player " + player.getName()
 					+ "'s turn - Specify house number or 'q' to quit:\n<", 1,
 					6, -1, "q");
+			
+			dispatcher.notify(new Command(player, command));
 
 			if (command == -1)
 				break;

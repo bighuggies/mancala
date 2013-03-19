@@ -1,6 +1,6 @@
 package mancala;
 
-public class Store extends SeedHolder {
+public class Store extends Piece {
 
 	public Store(Player owner) {
 		super(owner);
@@ -8,7 +8,7 @@ public class Store extends SeedHolder {
 	}
 	
 	@Override
-	public int takeSeedsFrom(SeedHolder seedHolder, int seeds) {
+	public int takeSeedsFrom(Piece seedHolder, int seeds) {
 		if (seedHolder.getOwner() == this.getOwner()) {
 			return super.takeSeedsFrom(seedHolder, seeds);
 		} else {

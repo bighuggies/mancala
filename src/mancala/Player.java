@@ -4,11 +4,11 @@ import java.util.Arrays;
 
 public class Player {
 	private String _name;
-	private SeedHolder[] _stores;
+	private Piece[] _stores;
 
 	public Player(String name, int numHolders) {
 		this._name = name;
-		this._stores = new SeedHolder[numHolders];
+		this._stores = new Piece[numHolders];
 
 		for (int i = 0; i < numHolders - 1; i++) {
 			this._stores[i] = new House(this);
@@ -21,16 +21,16 @@ public class Player {
 		return this._name;
 	}
 
-	public SeedHolder[] getHouses() {
-		return (SeedHolder[]) Arrays.asList(_stores)
+	public Piece[] getHouses() {
+		return (Piece[]) Arrays.asList(_stores)
 				.subList(0, _stores.length - 2).toArray();
 	}
 
-	public SeedHolder getStore() {
+	public Piece getStore() {
 		return _stores[_stores.length - 1];
 	}
 
-	public SeedHolder getHouse(int index) {
+	public Piece getHouse(int index) {
 		return this._stores[index];
 	}
 }
