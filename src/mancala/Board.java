@@ -2,10 +2,13 @@ package mancala;
 
 import java.util.Arrays;
 
+import events.BadCommandEvent;
 import events.CommandEvent;
 import events.CommandListener;
 import events.EndedInStoreEvent;
 import events.Events;
+import events.GameEndEvent;
+import events.GameEndEvent.Reason;
 import events.StealEvent;
 import events.StealListener;
 
@@ -43,28 +46,25 @@ public class Board implements CommandListener, StealListener {
 		while (numSeeds > 0) {
 			pieceIndex++;
 
-			if (pieceIndex > _pieces.length - 1) {
+			if (pieceIndex == _pieces.length) {
 				pieceIndex = 0;
 			}
 
-			if (isHouse(pieceIndex)
-					|| isPlayerStore(pieceIndex, fromPlayer)) {
+			if (isHouse(pieceIndex) || isPlayerStore(pieceIndex, fromPlayer)) {
 				_pieces[pieceIndex]++;
 				numSeeds--;
 			}
 		}
 
-		if (_pieces[pieceIndex] == 1
-				&& isPlayerHouse(pieceIndex, fromPlayer)) {
-			_dispatcher.notify(this, new StealEvent(pieceIndex, fromPlayer));
-		} 
-
-		System.out.println(pieceIndex);
-		System.out.println(_pieces[pieceIndex]);
-		System.out.println(isPlayerStore(pieceIndex, fromPlayer));
-
-		if (isPlayerStore(_pieces[pieceIndex], fromPlayer)) {
+		// Check for turn continuations
+		if (isPlayerStore(pieceIndex, fromPlayer)) {
 			_dispatcher.notify(this, new EndedInStoreEvent(0, fromPlayer));
+		}
+
+		// Check for steals
+		if (_pieces[pieceIndex] == 1 && isPlayerHouse(pieceIndex, fromPlayer)) {
+			_dispatcher.notify(this, new StealEvent(pieceIndex
+					% PIECES_PER_PLAYER, fromPlayer));
 		}
 	}
 
@@ -77,8 +77,8 @@ public class Board implements CommandListener, StealListener {
 	}
 
 	private boolean isPlayerPiece(int pieceIndex, int playerNumber) {
-		return (pieceIndex >= playerNumber * PIECES_PER_PLAYER && pieceIndex < playerNumber
-				+ 1 * PIECES_PER_PLAYER);
+		return (pieceIndex >= playerNumber * PIECES_PER_PLAYER && pieceIndex < (playerNumber + 1)
+				* PIECES_PER_PLAYER);
 	}
 
 	private boolean isHouse(int pieceIndex) {
@@ -117,39 +117,82 @@ public class Board implements CommandListener, StealListener {
 				((playerNumber + 1) * PIECES_PER_PLAYER) - STORES_PER_PLAYER);
 	}
 
-	private int getOppositeHouse(int playerNumber, int houseIndex) {
-		int offset = PIECES_PER_PLAYER - (houseIndex % PIECES_PER_PLAYER);
+	public int[] getScores() {
+		int[] scores = new int[NUM_PLAYERS];
 
-		return ((playerNumber + 1 % NUM_PLAYERS) * PIECES_PER_PLAYER) + offset;
+		for (int i = 0; i < NUM_PLAYERS; i++) {
+			int score = 0;
+			int firstPiece = i * PIECES_PER_PLAYER;
+			int lastPiece = firstPiece + PIECES_PER_PLAYER;
+
+			for (int j = firstPiece; j < lastPiece; j++) {
+				score += _pieces[j];
+			}
+
+			scores[i] = score;
+		}
+
+		return scores;
+	}
+
+	private int getOppositeHouse(int playerNumber, int houseNumber) {
+		int offset = PIECES_PER_PLAYER - STORES_PER_PLAYER - houseNumber;
+
+		return (((playerNumber + 1) % NUM_PLAYERS) * PIECES_PER_PLAYER)
+				+ offset - 1;
 	}
 
 	private boolean verifyCommand(CommandEvent command) {
 		int pieceIndex = (command.player.number * PIECES_PER_PLAYER)
 				+ command.houseIndex;
 
-		return isPlayerHouse(pieceIndex, command.player.number);
+		return _pieces[pieceIndex] > 0;
 	}
 
 	@Override
 	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command) {
-		if (!verifyCommand(command) && false)
-			throw new IllegalArgumentException();
+		if (!verifyCommand(command)) {
+			_dispatcher.notify(this, new BadCommandEvent(command.player));
+			return;
+		}
 
 		int fromPlayer = command.player.number;
 
 		distributeSeeds((fromPlayer * PIECES_PER_PLAYER) + command.houseIndex,
 				fromPlayer);
+
+		if (playerHousesEmpty(command.player.number)) {
+			_dispatcher.notify(this, new GameEndEvent(Reason.FINISHED));
+		}
+	}
+
+	private boolean playerHousesEmpty(int playerIndex) {
+		int firstHouse = playerIndex * PIECES_PER_PLAYER;
+
+		for (int i = firstHouse; i < firstHouse + HOUSES_PER_PLAYER; i++) {
+			if (_pieces[i] > 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	@Override
 	public void onStealMove(Board boardContext, StealEvent stealEvent) {
 		int oppositeHouse = getOppositeHouse(stealEvent.stealingPlayerNumber,
 				stealEvent.stealingHouseNumber);
-		int seeds = _pieces[oppositeHouse]
-				+ _pieces[stealEvent.stealingHouseNumber];
+		int stealingHouse = (stealEvent.stealingPlayerNumber * PIECES_PER_PLAYER)
+				+ stealEvent.stealingHouseNumber;
+
+		// System.out.println("House opposite to "
+		// + (stealEvent.stealingHouseNumber + 1) + " is " + ((oppositeHouse %
+		// PIECES_PER_PLAYER) + 1));
+
+		int seeds = _pieces[oppositeHouse] + _pieces[stealingHouse];
 
 		_pieces[oppositeHouse] = 0;
-		_pieces[stealEvent.stealingHouseNumber] = 0;
+		_pieces[stealingHouse] = 0;
 		_pieces[getPlayerStore(stealEvent.stealingPlayerNumber, 0)] += seeds;
 	}
 }

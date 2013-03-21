@@ -1,6 +1,10 @@
 package display;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import mancala.Board;
+import mancala.Player;
 import utility.IO;
 
 public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
@@ -10,7 +14,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		this.io = io;
 	}
 
-	public void display(Board board) {
+	public void displayBoard(Board board) {
 		printHorizontalBorder(board.HOUSES_PER_PLAYER);
 
 		printPlayer2("P2", board.getPlayerHouses(1),
@@ -23,39 +27,71 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 	}
 
 	private void printPlayerDivider() {
-		io.println(">|    |-------+-------+-------+-------+-------+-------|    |");
+		io.println("|    |-------+-------+-------+-------+-------+-------|    |");
 	}
 
 	private void printPlayer2(String playerName, int[] playerHouses,
 			int playerStore) {
-		io.print(String.format(">| %s |", playerName));
-		
-			
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(String.format("| %s |", playerName));
+
 		for (int i = playerHouses.length - 1; i >= 0; i--) {
-			io.print(String.format(" %d[%2d] |", (i + 1), playerHouses[i]));
+			sb.append(String.format(" %d[%2d] |", (i + 1), playerHouses[i]));
 		}
 
-		io.print(String.format(" %2d |\n", playerStore));
+		sb.append(String.format(" %2d |", playerStore));
+		io.println(sb.toString());
 	}
-	
+
 	private void printPlayer1(String playerName, int[] playerHouses,
 			int playerStore) {
-		io.print(String.format(">| %2d |", playerStore));
-		
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(String.format("| %2d |", playerStore));
+
 		for (int i = 0; i < playerHouses.length; i++) {
-			io.print(String.format(" %d[%2d] |", (i + 1), playerHouses[i]));
+			sb.append(String.format(" %d[%2d] |", (i + 1), playerHouses[i]));
 		}
-		
-		io.print(String.format(" %s |\n", playerName));
+
+		sb.append(String.format(" %s |", playerName));
+		io.println(sb.toString());
 	}
 
 	public void printHorizontalBorder(int numPits) {
-		io.print(">+----+");
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("+----+");
 
 		for (int i = 0; i < numPits; i++) {
-			io.print("-------+");
+			sb.append("-------+");
 		}
 
-		io.print("----+\n");
+		sb.append("----+");
+		io.println(sb.toString());
+	}
+
+	@Override
+	public void displayScores(HashMap<Player, Integer> scores) {
+		Player winner = null;
+		int bestScore = 0;
+
+		for (Entry<Player, Integer> e : scores.entrySet()) {
+			io.println("\tplayer " + e.getKey().name + ":" + e.getValue());
+
+			// ugly
+			if (e.getValue() > bestScore) {
+				bestScore = e.getValue();
+				winner = e.getKey();
+			} else if (e.getValue() == bestScore) {
+				winner = null;
+			}
+		}
+
+		if (winner == null) {
+			io.println("A tie!");
+		} else {
+			io.println("Player " + winner.name + " wins!");
+		}
 	}
 }
