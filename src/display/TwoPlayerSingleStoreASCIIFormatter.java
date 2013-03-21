@@ -1,56 +1,60 @@
 package display;
 
 import mancala.Board;
+import utility.IO;
 
 public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
-	@Override
+	private IO io;
+
+	public TwoPlayerSingleStoreASCIIFormatter(IO io) {
+		this.io = io;
+	}
+
 	public void display(Board board) {
 		printHorizontalBorder(board.HOUSES_PER_PLAYER);
 
 		printPlayer1("P2", board.getPlayerHouses(2),
-				board.getPlayerStores(1)[0]);
+				board.getPlayerStores(0)[0]);
 		printPlayerDivider();
 		printPlayer2("P1", board.getPlayerHouses(1),
-				board.getPlayerStores(2)[0]);
+				board.getPlayerStores(1)[0]);
 
 		printHorizontalBorder(board.HOUSES_PER_PLAYER);
 	}
 
 	private void printPlayerDivider() {
-		System.out
-				.println("|    |-------+-------+-------+-------+-------+-------|    |");
-	}
-
-	private void printPlayer1(String playerName, int[] playerHouses,
-			int playerStore) {
-		System.out.print("| " + playerName + " | ");
-
-		for (int i = playerHouses.length; i >= 0; i--) {
-			System.out.print((i + 1) + "[ 1] | ");
-		}
-
-		System.out.print(playerStore + " |");
+		io.println("|    |-------+-------+-------+-------+-------+-------|    |");
 	}
 
 	private void printPlayer2(String playerName, int[] playerHouses,
 			int playerStore) {
-		System.out.print("| " + playerStore + " | ");
-
+		io.print(String.format("| %2d | ", playerStore));
+	
 		for (int i = playerHouses.length; i >= 0; i--) {
-			System.out.print(String.format("%d[%2d] |", (i + 1),
-					playerHouses[i]));
+			io.print(String.format("%d[%2d] |", (i + 1), playerHouses[i]));
 		}
 
-		System.out.print(playerName + " |");
+		io.print(playerName + " |\n");
+	}
+	
+	private void printPlayer1(String playerName, int[] playerHouses,
+			int playerStore) {
+		io.print("| " + playerName + " | ");
+
+		for (int i = playerHouses.length; i >= 0; i--) {
+			io.print((i + 1) + "[ 1] | ");
+		}
+
+		io.print(String.format("%2d |\n", playerStore));
 	}
 
 	public void printHorizontalBorder(int numPits) {
-		System.out.print("+----+");
+		io.print("+----+");
 
 		for (int i = 0; i < numPits; i++) {
-			System.out.print("-------+");
+			io.print("-------+");
 		}
 
-		System.out.print("----+");
+		io.print("----+\n");
 	}
 }

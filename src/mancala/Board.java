@@ -96,12 +96,15 @@ public class Board implements CommandListener, StealListener {
 	}
 
 	public int[] getPlayerStores(int playerNumber) {
-		return Arrays.copyOfRange(_pieces, playerNumber * PIECES_PER_PLAYER,
-				playerNumber + 1 * PIECES_PER_PLAYER);
+		return new int[] { 1 };
+
+		// return Arrays.copyOfRange(_pieces, playerNumber * PIECES_PER_PLAYER,
+		// playerNumber + 1 * PIECES_PER_PLAYER);
 	}
 
 	public int[] getPlayerHouses(int playerNumber) {
-		return new int[] { 0, 1 };
+		return Arrays.copyOfRange(_pieces, playerNumber * PIECES_PER_PLAYER,
+				((playerNumber + 1) * PIECES_PER_PLAYER) - STORES_PER_PLAYER);
 	}
 
 	private int getOppositeHouse(int playerNumber, int houseIndex) {

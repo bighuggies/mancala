@@ -43,7 +43,6 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 		players = new ArrayList<Player>();
 		board = new Board(dispatcher);
 
-		printer = new TwoPlayerSingleStoreASCIIFormatter();
 
 		players.add(new Player("1", 0));
 		players.add(new Player("2", 1));
@@ -52,6 +51,7 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 	}
 
 	public void play(MockIO io) {
+		printer = new TwoPlayerSingleStoreASCIIFormatter(io);
 		this.io = io;
 		nextTurn();
 	}
