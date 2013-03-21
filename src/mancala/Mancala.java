@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.MockIO;
+import display.TwoPlayerSingleStoreASCIIFormatter;
+import display.MancalaFormatter;
 import events.CommandEvent;
 import events.CommandListener;
 import events.EndedInStoreEvent;
@@ -21,8 +23,9 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 	public final Board board;
 
 	private MockIO io;
-
 	private Events dispatcher;
+	private MancalaFormatter printer;
+
 	private Player currentPlayer;
 	private Player nextPlayerOverride;
 
@@ -33,11 +36,14 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 	public Mancala() {
 		dispatcher = new Events();
 
-		// Listen for game quit events
+		// Listen for game quit events, turn end events
 		dispatcher.listen(CommandEvent.class, this);
+		dispatcher.listen(TurnEndEvent.class, this);
 
 		players = new ArrayList<Player>();
 		board = new Board(dispatcher);
+
+		printer = new TwoPlayerSingleStoreASCIIFormatter();
 
 		players.add(new Player("1", 0));
 		players.add(new Player("2", 1));
@@ -47,15 +53,16 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 
 	public void play(MockIO io) {
 		this.io = io;
-		getNextCommand();
+		nextTurn();
 	}
 
-	public void getNextCommand() {
+	public void nextTurn() {
 		int command = io.readInteger(">Player " + currentPlayer.name
 				+ "'s turn - Specify house number or 'q' to quit:\n<", 1, 6,
 				-1, "q");
 
 		dispatcher.notify(this, new CommandEvent(currentPlayer, command));
+		dispatcher.notify(this, new TurnEndEvent(currentPlayer));
 	}
 
 	public Player getCurrentPlayer() {
@@ -87,7 +94,7 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 
 	@Override
 	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command) {
-		if (command.houseNumber == -1) {
+		if (command.houseIndex == -1) {
 			System.exit(0);
 		}
 	}
@@ -100,6 +107,7 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 	@Override
 	public void onTurnEnd(Mancala gameContext, TurnEndEvent event) {
 		currentPlayer = getNextPlayer(currentPlayer);
-		getNextCommand();
+		printer.display(board);
+		nextTurn();
 	}
 }

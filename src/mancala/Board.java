@@ -4,21 +4,18 @@ import java.util.Arrays;
 
 import events.CommandEvent;
 import events.CommandListener;
-import events.EndedInStoreEvent;
-import events.EndedInStoreListener;
 import events.Events;
 import events.StealEvent;
 import events.StealListener;
 
 public class Board implements CommandListener, StealListener {
-	private static final int NUM_PLAYERS = 2;
-	private static final int HOUSES_PER_PLAYER = 6;
-	private static final int STORES_PER_PLAYER = 1;
-	private static final int PIECES_PER_PLAYER = HOUSES_PER_PLAYER
-			+ STORES_PER_PLAYER;
-	private static final int TOTAL_PIECES = NUM_PLAYERS * PIECES_PER_PLAYER;
-	private static final int SEEDS_PER_HOUSE = 4;
-	private static final int SEEDS_PER_STORE = 0;
+	public final int NUM_PLAYERS = 2;
+	public final int HOUSES_PER_PLAYER = 6;
+	public final int STORES_PER_PLAYER = 1;
+	public final int PIECES_PER_PLAYER = HOUSES_PER_PLAYER + STORES_PER_PLAYER;
+	public final int TOTAL_PIECES = NUM_PLAYERS * PIECES_PER_PLAYER;
+	public final int SEEDS_PER_HOUSE = 4;
+	public final int SEEDS_PER_STORE = 0;
 
 	private Events _dispatcher;
 	private int[] _pieces;
@@ -39,7 +36,7 @@ public class Board implements CommandListener, StealListener {
 
 	private void distributeSeeds(int fromHouse, int fromPlayer) {
 		int numSeeds = _pieces[fromHouse];
-		int currentHouse = fromHouse + 1;
+		int currentHouse = fromHouse;
 
 		while (numSeeds > 0) {
 			currentHouse++;
@@ -49,27 +46,27 @@ public class Board implements CommandListener, StealListener {
 			}
 
 			if (isHouse(currentHouse)
-					|| isPlayersStore(currentHouse, fromPlayer)) {
+					|| isPlayerStore(currentHouse, fromPlayer)) {
 				_pieces[currentHouse]++;
 				numSeeds--;
 			}
 		}
 
 		if (_pieces[currentHouse] == 1
-				&& isPlayersHouse(currentHouse, fromPlayer)) {
+				&& isPlayerHouse(currentHouse, fromPlayer)) {
 			_dispatcher.notify(this, new StealEvent(currentHouse, fromPlayer));
 		}
 	}
 
-	private boolean isPlayersHouse(int pieceIndex, int playerNumber) {
-		return isHouse(pieceIndex) && isPlayersPiece(pieceIndex, playerNumber);
+	private boolean isPlayerHouse(int pieceIndex, int playerNumber) {
+		return isHouse(pieceIndex) && isPlayerPiece(pieceIndex, playerNumber);
 	}
 
-	private boolean isPlayersStore(int pieceIndex, int playerNumber) {
-		return isStore(pieceIndex) && isPlayersPiece(pieceIndex, playerNumber);
+	private boolean isPlayerStore(int pieceIndex, int playerNumber) {
+		return isStore(pieceIndex) && isPlayerPiece(pieceIndex, playerNumber);
 	}
 
-	private boolean isPlayersPiece(int pieceIndex, int playerNumber) {
+	private boolean isPlayerPiece(int pieceIndex, int playerNumber) {
 		return (pieceIndex >= playerNumber * PIECES_PER_PLAYER && pieceIndex < playerNumber
 				+ 1 * PIECES_PER_PLAYER);
 	}
@@ -82,6 +79,7 @@ public class Board implements CommandListener, StealListener {
 		return pieceIndex % PIECES_PER_PLAYER >= HOUSES_PER_PLAYER;
 	}
 
+	@SuppressWarnings("unused")
 	private int ownerOfPiece(int pieceIndex) {
 		for (int i = 0; i < NUM_PLAYERS; i++) {
 			if (i < (i + 1) * PIECES_PER_PLAYER) {
@@ -92,9 +90,18 @@ public class Board implements CommandListener, StealListener {
 		return -1;
 	}
 
-	private int getPlayersStore(int playerNumber, int storeNumber) {
+	private int getPlayerStore(int playerNumber, int storeNumber) {
 		return ((playerNumber * PIECES_PER_PLAYER) + HOUSES_PER_PLAYER)
 				+ storeNumber;
+	}
+
+	public int[] getPlayerStores(int playerNumber) {
+		return Arrays.copyOfRange(_pieces, playerNumber * PIECES_PER_PLAYER,
+				playerNumber + 1 * PIECES_PER_PLAYER);
+	}
+
+	public int[] getPlayerHouses(int playerNumber) {
+		return new int[] { 0, 1 };
 	}
 
 	private int getOppositeHouse(int playerNumber, int houseIndex) {
@@ -105,9 +112,9 @@ public class Board implements CommandListener, StealListener {
 
 	private boolean verifyCommand(CommandEvent command) {
 		int pieceIndex = (command.player.number * PIECES_PER_PLAYER)
-				+ command.houseNumber;
+				+ command.houseIndex;
 
-		return isPlayersHouse(pieceIndex, command.player.number);
+		return isPlayerHouse(pieceIndex, command.player.number);
 	}
 
 	@Override
@@ -115,9 +122,9 @@ public class Board implements CommandListener, StealListener {
 		if (!verifyCommand(command))
 			throw new IllegalArgumentException();
 
-		int fromPlayer = gameContext.getCurrentPlayer().number;
+		int fromPlayer = command.player.number;
 
-		distributeSeeds((fromPlayer * PIECES_PER_PLAYER) + command.houseNumber,
+		distributeSeeds((fromPlayer * PIECES_PER_PLAYER) + command.houseIndex,
 				fromPlayer);
 	}
 
@@ -130,6 +137,6 @@ public class Board implements CommandListener, StealListener {
 
 		_pieces[oppositeHouse] = 0;
 		_pieces[stealEvent.stealingHouseNumber] = 0;
-		_pieces[getPlayersStore(stealEvent.stealingPlayerNumber, 0)] += seeds;
+		_pieces[getPlayerStore(stealEvent.stealingPlayerNumber, 0)] += seeds;
 	}
 }

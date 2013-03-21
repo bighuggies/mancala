@@ -5,11 +5,11 @@ import mancala.Player;
 
 public class CommandEvent implements GameEvent<CommandListener> {
 	public final Player player;
-	public final int houseNumber;
+	public final int houseIndex;
 
 	public CommandEvent(Player player, int command) {
 		this.player = player;
-		this.houseNumber = command;
+		this.houseIndex = command - 1;
 	}
 
 	@Override
