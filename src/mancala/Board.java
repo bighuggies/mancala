@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import events.CommandEvent;
 import events.CommandListener;
+import events.EndedInStoreEvent;
 import events.Events;
 import events.StealEvent;
 import events.StealListener;
@@ -36,25 +37,34 @@ public class Board implements CommandListener, StealListener {
 
 	private void distributeSeeds(int fromHouse, int fromPlayer) {
 		int numSeeds = _pieces[fromHouse];
-		int currentHouse = fromHouse;
+		_pieces[fromHouse] = 0;
+		int pieceIndex = fromHouse;
 
 		while (numSeeds > 0) {
-			currentHouse++;
+			pieceIndex++;
 
-			if (currentHouse > _pieces.length - 1) {
-				currentHouse = 0;
+			if (pieceIndex > _pieces.length - 1) {
+				pieceIndex = 0;
 			}
 
-			if (isHouse(currentHouse)
-					|| isPlayerStore(currentHouse, fromPlayer)) {
-				_pieces[currentHouse]++;
+			if (isHouse(pieceIndex)
+					|| isPlayerStore(pieceIndex, fromPlayer)) {
+				_pieces[pieceIndex]++;
 				numSeeds--;
 			}
 		}
 
-		if (_pieces[currentHouse] == 1
-				&& isPlayerHouse(currentHouse, fromPlayer)) {
-			_dispatcher.notify(this, new StealEvent(currentHouse, fromPlayer));
+		if (_pieces[pieceIndex] == 1
+				&& isPlayerHouse(pieceIndex, fromPlayer)) {
+			_dispatcher.notify(this, new StealEvent(pieceIndex, fromPlayer));
+		} 
+
+		System.out.println(pieceIndex);
+		System.out.println(_pieces[pieceIndex]);
+		System.out.println(isPlayerStore(pieceIndex, fromPlayer));
+
+		if (isPlayerStore(_pieces[pieceIndex], fromPlayer)) {
+			_dispatcher.notify(this, new EndedInStoreEvent(0, fromPlayer));
 		}
 	}
 
@@ -96,10 +106,10 @@ public class Board implements CommandListener, StealListener {
 	}
 
 	public int[] getPlayerStores(int playerNumber) {
-		return new int[] { 1 };
+		int lastPiece = (playerNumber + 1) * PIECES_PER_PLAYER;
+		int firstStore = lastPiece - STORES_PER_PLAYER;
 
-		// return Arrays.copyOfRange(_pieces, playerNumber * PIECES_PER_PLAYER,
-		// playerNumber + 1 * PIECES_PER_PLAYER);
+		return Arrays.copyOfRange(_pieces, firstStore, lastPiece);
 	}
 
 	public int[] getPlayerHouses(int playerNumber) {
@@ -122,7 +132,7 @@ public class Board implements CommandListener, StealListener {
 
 	@Override
 	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command) {
-		if (!verifyCommand(command))
+		if (!verifyCommand(command) && false)
 			throw new IllegalArgumentException();
 
 		int fromPlayer = command.player.number;

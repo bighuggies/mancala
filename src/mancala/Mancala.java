@@ -39,6 +39,7 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 		// Listen for game quit events, turn end events
 		dispatcher.listen(CommandEvent.class, this);
 		dispatcher.listen(TurnEndEvent.class, this);
+		dispatcher.listen(EndedInStoreEvent.class, this);
 
 		players = new ArrayList<Player>();
 		board = new Board(dispatcher);
@@ -53,6 +54,7 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 	public void play(MockIO io) {
 		printer = new TwoPlayerSingleStoreASCIIFormatter(io);
 		this.io = io;
+		this.printer.display(board);
 		nextTurn();
 	}
 
@@ -94,7 +96,7 @@ public class Mancala implements CommandListener, EndedInStoreListener,
 
 	@Override
 	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command) {
-		if (command.houseIndex == -1) {
+		if (command.houseIndex < 0) {
 			System.exit(0);
 		}
 	}

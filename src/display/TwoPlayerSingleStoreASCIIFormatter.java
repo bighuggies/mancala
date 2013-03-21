@@ -13,43 +13,44 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 	public void display(Board board) {
 		printHorizontalBorder(board.HOUSES_PER_PLAYER);
 
-		printPlayer1("P2", board.getPlayerHouses(2),
+		printPlayer2("P2", board.getPlayerHouses(1),
 				board.getPlayerStores(0)[0]);
 		printPlayerDivider();
-		printPlayer2("P1", board.getPlayerHouses(1),
+		printPlayer1("P1", board.getPlayerHouses(0),
 				board.getPlayerStores(1)[0]);
 
 		printHorizontalBorder(board.HOUSES_PER_PLAYER);
 	}
 
 	private void printPlayerDivider() {
-		io.println("|    |-------+-------+-------+-------+-------+-------|    |");
+		io.println(">|    |-------+-------+-------+-------+-------+-------|    |");
 	}
 
 	private void printPlayer2(String playerName, int[] playerHouses,
 			int playerStore) {
-		io.print(String.format("| %2d | ", playerStore));
-	
-		for (int i = playerHouses.length; i >= 0; i--) {
-			io.print(String.format("%d[%2d] |", (i + 1), playerHouses[i]));
+		io.print(String.format(">| %s |", playerName));
+		
+			
+		for (int i = playerHouses.length - 1; i >= 0; i--) {
+			io.print(String.format(" %d[%2d] |", (i + 1), playerHouses[i]));
 		}
 
-		io.print(playerName + " |\n");
+		io.print(String.format(" %2d |\n", playerStore));
 	}
 	
 	private void printPlayer1(String playerName, int[] playerHouses,
 			int playerStore) {
-		io.print("| " + playerName + " | ");
-
-		for (int i = playerHouses.length; i >= 0; i--) {
-			io.print((i + 1) + "[ 1] | ");
+		io.print(String.format(">| %2d |", playerStore));
+		
+		for (int i = 0; i < playerHouses.length; i++) {
+			io.print(String.format(" %d[%2d] |", (i + 1), playerHouses[i]));
 		}
-
-		io.print(String.format("%2d |\n", playerStore));
+		
+		io.print(String.format(" %s |\n", playerName));
 	}
 
 	public void printHorizontalBorder(int numPits) {
-		io.print("+----+");
+		io.print(">+----+");
 
 		for (int i = 0; i < numPits; i++) {
 			io.print("-------+");
