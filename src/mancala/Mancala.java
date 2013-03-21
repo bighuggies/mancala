@@ -6,17 +6,25 @@ import java.util.List;
 import utility.MockIO;
 import events.CommandEvent;
 import events.CommandListener;
+import events.EndedInStoreEvent;
+import events.EndedInStoreListener;
 import events.Events;
+import events.TurnEndEvent;
+import events.TurnEndListener;
 
 /**
  * This class is the starting point for SOFTENG 701 Assignment 1.1 in 2013.
  */
-public class Mancala implements CommandListener {
+public class Mancala implements CommandListener, EndedInStoreListener,
+		TurnEndListener {
 	public final List<Player> players;
 	public final Board board;
-	
+
+	private MockIO io;
+
 	private Events dispatcher;
 	private Player currentPlayer;
+	private Player nextPlayerOverride;
 
 	public static void main(String[] args) {
 		new Mancala().play(new MockIO());
@@ -24,7 +32,7 @@ public class Mancala implements CommandListener {
 
 	public Mancala() {
 		dispatcher = new Events();
-		
+
 		// Listen for game quit events
 		dispatcher.listen(CommandEvent.class, this);
 
@@ -38,32 +46,60 @@ public class Mancala implements CommandListener {
 	}
 
 	public void play(MockIO io) {
-		while (true) {
-			int command = io.readInteger(">Player " + currentPlayer.name
-					+ "'s turn - Specify house number or 'q' to quit:\n<", 1,
-					6, -1, "q");
+		this.io = io;
+		getNextCommand();
+	}
 
-			dispatcher.notify(this, new CommandEvent(currentPlayer, command));
+	public void getNextCommand() {
+		int command = io.readInteger(">Player " + currentPlayer.name
+				+ "'s turn - Specify house number or 'q' to quit:\n<", 1, 6,
+				-1, "q");
 
-			currentPlayer = getNextPlayer(currentPlayer);
-		}
+		dispatcher.notify(this, new CommandEvent(currentPlayer, command));
 	}
 
 	public Player getCurrentPlayer() {
 		return currentPlayer;
 	}
-	
+
 	public Player getNextPlayer(Player currentPlayer) {
-		int cur = this.players.indexOf(currentPlayer);
-		int next = (cur + 1) % this.players.size();		
-		
+		return getNextPlayer(this.players.indexOf(currentPlayer));
+	}
+
+	public Player getNextPlayer(int currentPlayer) {
+		if (nextPlayerOverride != null) {
+			nextPlayerOverride = null;
+			return nextPlayerOverride;
+		}
+
+		int next = (currentPlayer + 1) % this.players.size();
+
 		return this.players.get(next);
+	}
+
+	public void overrideNextPlayer(int player) {
+		nextPlayerOverride = this.players.get(player);
+	}
+
+	public void overrideNextPlayer(Player player) {
+		overrideNextPlayer(player.number);
 	}
 
 	@Override
 	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command) {
-		if (command.command == -1) {
+		if (command.houseNumber == -1) {
 			System.exit(0);
 		}
+	}
+
+	@Override
+	public void onEndedInStore(Board boardContext, EndedInStoreEvent event) {
+		overrideNextPlayer(event.playerNumber);
+	}
+
+	@Override
+	public void onTurnEnd(Mancala gameContext, TurnEndEvent event) {
+		currentPlayer = getNextPlayer(currentPlayer);
+		getNextCommand();
 	}
 }
