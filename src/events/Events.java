@@ -48,12 +48,12 @@ public final class Events {
 	}
 
 	/** Notify a new event to registered listeners of this event class **/
-	public <L> void notify(final GameEvent<L> evt) {
+	public <L> void notify(final Object context, final GameEvent<L> evt) {
 		@SuppressWarnings("unchecked")
 		Class<GameEvent<L>> evtClass = (Class<GameEvent<L>>) evt.getClass();
 
 		for (L listener : listenersOf(evtClass)) {
-			evt.notify(listener);
+			evt.notify(context, listener);
 		}
 	}
 

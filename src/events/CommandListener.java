@@ -1,5 +1,7 @@
 package events;
 
+import mancala.Mancala;
+
 public interface CommandListener {
-	public void playerIssuedCommand(Command command);
+	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command);
 }
