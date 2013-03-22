@@ -13,7 +13,6 @@ import events.GameEndEvent.Reason;
 
 public abstract class MancalaFormatter implements GameObject, TurnEndListener,
 		GameStartListener, GameEndListener {
-	private Events _events;
 
 	public void displayBoard(Board board) {
 		// override
@@ -38,12 +37,10 @@ public abstract class MancalaFormatter implements GameObject, TurnEndListener,
 			displayScores(event.boardState.getScores());
 		}
 	}
-	
-	public void setEvents(Events events) {
-		this._events = events;
 
-		_events.listen(GameStartEvent.class, this);
-		_events.listen(GameEndEvent.class, this);
-		_events.listen(TurnEndEvent.class, this);
+	public void setEvents(Events events) {
+		events.listen(GameStartEvent.class, this);
+		events.listen(GameEndEvent.class, this);
+		events.listen(TurnEndEvent.class, this);
 	}
 }

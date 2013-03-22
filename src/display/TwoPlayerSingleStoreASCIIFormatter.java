@@ -3,7 +3,6 @@ package display;
 import mancala.Board;
 import mancala.Config;
 import utility.IO;
-import events.Events;
 
 public class TwoPlayerSingleStoreASCIIFormatter extends MancalaFormatter {
 	private IO _io;
