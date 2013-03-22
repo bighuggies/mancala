@@ -1,15 +1,12 @@
 package events;
 
-import mancala.Mancala;
-import mancala.Player;
-
 public class CommandEvent implements GameEvent<CommandListener> {
-	public final Player player;
-	public final int houseIndex;
+	public final int playerNumber;
+	public final int houseNumber;
 
-	public CommandEvent(Player player, int command) {
-		this.player = player;
-		this.houseIndex = command - 1;
+	public CommandEvent(int playerNumber, int command) {
+		this.playerNumber = playerNumber;
+		this.houseNumber = command - 1;
 	}
 
 	@Override

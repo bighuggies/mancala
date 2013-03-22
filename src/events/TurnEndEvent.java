@@ -1,13 +1,10 @@
 package events;
 
-import mancala.Mancala;
-import mancala.Player;
-
 public class TurnEndEvent implements GameEvent<TurnEndListener> {
 
-	public final Player playersTurn;
+	public final int playersTurn;
 
-	public TurnEndEvent(Player player) {
+	public TurnEndEvent(int player) {
 		this.playersTurn = player;
 	}
 

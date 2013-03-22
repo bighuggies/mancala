@@ -1,10 +1,5 @@
 package mancala;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import utility.MockIO;
 import display.MancalaFormatter;
 import display.TwoPlayerSingleStoreASCIIFormatter;
@@ -25,8 +20,8 @@ import events.TurnEndListener;
  */
 public class Mancala implements BadCommandListener, EndedInStoreListener,
 		TurnEndListener, GameEndListener {
-	public final List<Player> players;
 	public final Board board;
+	public final int[] players;
 
 	private MockIO io;
 	private Events dispatcher;
@@ -34,8 +29,8 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 	private boolean playing = true;
 	private Reason gameEndReason;
 
-	private Player currentPlayer;
-	private Player nextPlayerOverride;
+	private int currentPlayer;
+	private int nextPlayerOverride = -1;
 
 	public static void main(String[] args) {
 		new Mancala().play(new MockIO());
@@ -50,13 +45,10 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 		dispatcher.listen(GameEndEvent.class, this);
 		dispatcher.listen(BadCommandEvent.class, this);
 
-		players = new ArrayList<Player>();
 		board = new Board(dispatcher);
 
-		players.add(new Player("1", 0));
-		players.add(new Player("2", 1));
-
-		currentPlayer = players.get(0);
+		players = new int[Config.NUM_PLAYERS];
+		currentPlayer = 0;
 	}
 
 	public void play(MockIO io) {
@@ -72,22 +64,12 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 		printer.displayBoard(board);
 
 		if (gameEndReason == Reason.FINISHED) {
-			HashMap<Player, Integer> scores = new LinkedHashMap<Player, Integer>();
-			int[] points = board.getScores();
-
-			for (int i = 0; i < points.length; i++) {
-				Player player = players.get(i);
-				int score = points[i];
-
-				scores.put(player, score);
-			}
-
-			this.printer.displayScores(scores);
+			this.printer.displayScores(board.getScores());
 		}
 	}
 
 	public void nextTurn() {
-		String prompt = "Player " + currentPlayer.name
+		String prompt = "Player " + (currentPlayer + 1)
 				+ "'s turn - Specify house number or 'q' to quit: ";
 		int command = io.readInteger(prompt, 1, 6, -1, "q");
 
@@ -100,32 +82,22 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 		dispatcher.notify(new TurnEndEvent(currentPlayer));
 	}
 
-	public Player getCurrentPlayer() {
+	public int getCurrentPlayer() {
 		return currentPlayer;
 	}
 
-	public Player getNextPlayer(Player currentPlayer) {
-		return getNextPlayer(this.players.indexOf(currentPlayer));
-	}
-
-	public Player getNextPlayer(int currentPlayer) {
-		if (nextPlayerOverride != null) {
-			Player nextPlayer = nextPlayerOverride;
-			nextPlayerOverride = null;
+	public int getNextPlayer(int currentPlayer) {
+		if (nextPlayerOverride != -1) {
+			int nextPlayer = nextPlayerOverride;
+			nextPlayerOverride = -1;
 			return nextPlayer;
 		}
 
-		int next = (currentPlayer + 1) % this.players.size();
-
-		return this.players.get(next);
+		return (currentPlayer + 1) % this.players.length;
 	}
 
-	public void overrideNextPlayer(int player) {
-		nextPlayerOverride = this.players.get(player);
-	}
-
-	public void overrideNextPlayer(Player player) {
-		overrideNextPlayer(player.number);
+	public void overrideNextPlayer(int playerNumber) {
+		nextPlayerOverride = playerNumber;
 	}
 
 	@Override

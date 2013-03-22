@@ -1,10 +1,7 @@
 package display;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-
 import mancala.Board;
-import mancala.Player;
+import mancala.Config;
 import utility.IO;
 
 public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
@@ -15,7 +12,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 	}
 
 	public void displayBoard(Board board) {
-		printHorizontalBorder(board.HOUSES_PER_PLAYER);
+		printHorizontalBorder(Config.HOUSES_PER_PLAYER);
 
 		printPlayer2("P2", board.getPlayerHouses(1),
 				board.getPlayerStores(0)[0]);
@@ -23,7 +20,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		printPlayer1("P1", board.getPlayerHouses(0),
 				board.getPlayerStores(1)[0]);
 
-		printHorizontalBorder(board.HOUSES_PER_PLAYER);
+		printHorizontalBorder(Config.HOUSES_PER_PLAYER);
 	}
 
 	private void printPlayerDivider() {
@@ -72,26 +69,25 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 	}
 
 	@Override
-	public void displayScores(HashMap<Player, Integer> scores) {
-		Player winner = null;
+	public void displayScores(int[] scores) {
+		int winner = -1;
 		int bestScore = 0;
 
-		for (Entry<Player, Integer> e : scores.entrySet()) {
-			io.println("\tplayer " + e.getKey().name + ":" + e.getValue());
+		for (int i = 0; i < scores.length; i++) {
+			io.println("\tplayer " + (i + 1) + ":" + scores[i]);
 
-			// ugly
-			if (e.getValue() > bestScore) {
-				bestScore = e.getValue();
-				winner = e.getKey();
-			} else if (e.getValue() == bestScore) {
-				winner = null;
+			if (scores[i] > bestScore) {
+				bestScore = scores[i];
+				winner = i;
+			} else if (scores[i] == bestScore) {
+				winner = -1;
 			}
 		}
 
-		if (winner == null) {
+		if (winner == -1) {
 			io.println("A tie!");
 		} else {
-			io.println("Player " + winner.name + " wins!");
+			io.println("Player " + (winner + 1) + " wins!");
 		}
 	}
 }

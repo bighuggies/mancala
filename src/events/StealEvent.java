@@ -1,7 +1,5 @@
 package events;
 
-import mancala.Board;
-
 public class StealEvent implements GameEvent<StealListener> {
 	public final int stealingHouseNumber;
 	public final int stealingPlayerNumber;

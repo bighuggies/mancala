@@ -11,6 +11,7 @@ import java.util.HashMap;
 public final class Events {
 
 	/** mapping of class events to active listeners **/
+	@SuppressWarnings("rawtypes")
 	private final HashMap<Class, ArrayList> map = new HashMap<Class, ArrayList>(
 			10);
 
