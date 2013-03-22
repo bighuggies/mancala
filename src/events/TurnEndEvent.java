@@ -12,8 +12,7 @@ public class TurnEndEvent implements GameEvent<TurnEndListener> {
 	}
 
 	@Override
-	public void notify(Object context, TurnEndListener listener) {
-		Mancala gameContext = (Mancala) context;
-		listener.onTurnEnd(gameContext, this);
+	public void notify(TurnEndListener listener) {
+		listener.onTurnEnd(this);
 	}
 }

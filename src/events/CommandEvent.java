@@ -13,8 +13,7 @@ public class CommandEvent implements GameEvent<CommandListener> {
 	}
 
 	@Override
-	public void notify(Object context, CommandListener listener) {
-		Mancala gameContext = (Mancala) context;
-		listener.onPlayerIssuedCommand(gameContext, this);
+	public void notify(CommandListener listener) {
+		listener.onPlayerIssuedCommand(this);
 	}
 }

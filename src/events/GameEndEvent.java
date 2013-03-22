@@ -12,7 +12,7 @@ public class GameEndEvent implements GameEvent<GameEndListener> {
 	}
 
 	@Override
-	public void notify(Object context, GameEndListener listener) {
+	public void notify(GameEndListener listener) {
 		listener.onGameEnd(this);
 	}
 }

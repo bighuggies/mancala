@@ -12,8 +12,7 @@ public class StealEvent implements GameEvent<StealListener> {
 	}
 
 	@Override
-	public void notify(Object context, StealListener listener) {
-		Board boardContext = (Board) context;
-		listener.onStealMove(boardContext, this);
+	public void notify(StealListener listener) {
+		listener.onStealMove(this);
 	}
 }

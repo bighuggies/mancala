@@ -10,7 +10,7 @@ public class BadCommandEvent implements GameEvent<BadCommandListener> {
 	}
 	
 	@Override
-	public void notify(Object context, BadCommandListener listener) {
+	public void notify(BadCommandListener listener) {
 		listener.onBadCommand(this);
 	}
 }

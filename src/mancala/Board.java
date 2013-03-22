@@ -58,13 +58,13 @@ public class Board implements CommandListener, StealListener {
 
 		// Check for turn continuations
 		if (isPlayerStore(pieceIndex, fromPlayer)) {
-			_dispatcher.notify(this, new EndedInStoreEvent(0, fromPlayer));
+			_dispatcher.notify(new EndedInStoreEvent(0, fromPlayer));
 		}
 
 		// Check for steals
 		if (_pieces[pieceIndex] == 1 && isPlayerHouse(pieceIndex, fromPlayer)) {
-			_dispatcher.notify(this, new StealEvent(pieceIndex
-					% PIECES_PER_PLAYER, fromPlayer));
+			_dispatcher.notify(new StealEvent(pieceIndex % PIECES_PER_PLAYER,
+					fromPlayer));
 		}
 	}
 
@@ -135,6 +135,18 @@ public class Board implements CommandListener, StealListener {
 		return scores;
 	}
 
+	private boolean playerHousesEmpty(int playerIndex) {
+		int firstHouse = playerIndex * PIECES_PER_PLAYER;
+
+		for (int i = firstHouse; i < firstHouse + HOUSES_PER_PLAYER; i++) {
+			if (_pieces[i] > 0) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private int getOppositeHouse(int playerNumber, int houseNumber) {
 		int offset = PIECES_PER_PLAYER - STORES_PER_PLAYER - houseNumber;
 
@@ -150,9 +162,9 @@ public class Board implements CommandListener, StealListener {
 	}
 
 	@Override
-	public void onPlayerIssuedCommand(Mancala gameContext, CommandEvent command) {
+	public void onPlayerIssuedCommand(CommandEvent command) {
 		if (!verifyCommand(command)) {
-			_dispatcher.notify(this, new BadCommandEvent(command.player));
+			_dispatcher.notify(new BadCommandEvent(command.player));
 			return;
 		}
 
@@ -162,24 +174,12 @@ public class Board implements CommandListener, StealListener {
 				fromPlayer);
 
 		if (playerHousesEmpty(command.player.number)) {
-			_dispatcher.notify(this, new GameEndEvent(Reason.FINISHED));
+			_dispatcher.notify(new GameEndEvent(Reason.FINISHED));
 		}
-	}
-
-	private boolean playerHousesEmpty(int playerIndex) {
-		int firstHouse = playerIndex * PIECES_PER_PLAYER;
-
-		for (int i = firstHouse; i < firstHouse + HOUSES_PER_PLAYER; i++) {
-			if (_pieces[i] > 0) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	@Override
-	public void onStealMove(Board boardContext, StealEvent stealEvent) {
+	public void onStealMove(StealEvent stealEvent) {
 		int oppositeHouse = getOppositeHouse(stealEvent.stealingPlayerNumber,
 				stealEvent.stealingHouseNumber);
 		int stealingHouse = (stealEvent.stealingPlayerNumber * PIECES_PER_PLAYER)

@@ -92,12 +92,12 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 		int command = io.readInteger(prompt, 1, 6, -1, "q");
 
 		if (command == -1) {
-			dispatcher.notify(this, new GameEndEvent(Reason.QUITTING));
+			dispatcher.notify(new GameEndEvent(Reason.QUITTING));
 			return;
 		}
 
-		dispatcher.notify(this, new CommandEvent(currentPlayer, command));
-		dispatcher.notify(this, new TurnEndEvent(currentPlayer));
+		dispatcher.notify(new CommandEvent(currentPlayer, command));
+		dispatcher.notify(new TurnEndEvent(currentPlayer));
 	}
 
 	public Player getCurrentPlayer() {
@@ -129,12 +129,12 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 	}
 
 	@Override
-	public void onEndedInStore(Board boardContext, EndedInStoreEvent event) {
+	public void onEndedInStore(EndedInStoreEvent event) {
 		overrideNextPlayer(event.playerNumber);
 	}
 
 	@Override
-	public void onTurnEnd(Mancala gameContext, TurnEndEvent event) {
+	public void onTurnEnd(TurnEndEvent event) {
 		if (playing) {
 			currentPlayer = getNextPlayer(currentPlayer);
 			printer.displayBoard(board);

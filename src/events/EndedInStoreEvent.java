@@ -1,7 +1,5 @@
 package events;
 
-import mancala.Board;
-
 public class EndedInStoreEvent implements GameEvent<EndedInStoreListener> {
 
 	public final int storeNumber;
@@ -13,8 +11,7 @@ public class EndedInStoreEvent implements GameEvent<EndedInStoreListener> {
 	}
 
 	@Override
-	public void notify(Object context, EndedInStoreListener listener) {
-		Board boardContext = (Board) context;
-		listener.onEndedInStore(boardContext, this);
+	public void notify(EndedInStoreListener listener) {
+		listener.onEndedInStore(this);
 	}
 }
