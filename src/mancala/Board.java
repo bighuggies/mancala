@@ -12,15 +12,11 @@ import events.GameEndEvent.Reason;
 import events.StealEvent;
 import events.StealListener;
 
-public class Board implements CommandListener, StealListener {
-	private Events _dispatcher;
+public class Board implements GameObject, CommandListener, StealListener {
+	private Events _events;
 	private int[] _pieces;
 
-	public Board(Events dispatcher) {
-		dispatcher.listen(CommandEvent.class, this);
-		dispatcher.listen(StealEvent.class, this);
-
-		_dispatcher = dispatcher;
+	public Board() {
 		_pieces = new int[Config.TOTAL_PIECES];
 
 		Arrays.fill(_pieces, Config.SEEDS_PER_HOUSE);
@@ -50,12 +46,12 @@ public class Board implements CommandListener, StealListener {
 
 		// Check for turn continuations
 		if (isPlayerStore(pieceIndex, fromPlayer)) {
-			_dispatcher.notify(new EndedInStoreEvent(0, fromPlayer));
+			_events.notify(new EndedInStoreEvent(0, fromPlayer));
 		}
 
 		// Check for steals
 		if (_pieces[pieceIndex] == 1 && isPlayerHouse(pieceIndex, fromPlayer)) {
-			_dispatcher.notify(new StealEvent(pieceIndex
+			_events.notify(new StealEvent(pieceIndex
 					% Config.PIECES_PER_PLAYER, fromPlayer));
 		}
 	}
@@ -159,7 +155,7 @@ public class Board implements CommandListener, StealListener {
 	@Override
 	public void onPlayerIssuedCommand(CommandEvent command) {
 		if (!verifyCommand(command)) {
-			_dispatcher.notify(new BadCommandEvent(command.playerNumber));
+			_events.notify(new BadCommandEvent(command.playerNumber));
 			return;
 		}
 
@@ -169,7 +165,7 @@ public class Board implements CommandListener, StealListener {
 				+ command.houseNumber, fromPlayer);
 
 		if (playerHousesEmpty(command.playerNumber)) {
-			_dispatcher.notify(new GameEndEvent(Reason.FINISHED, this));
+			_events.notify(new GameEndEvent(Reason.FINISHED, this));
 		}
 	}
 
@@ -185,5 +181,15 @@ public class Board implements CommandListener, StealListener {
 		_pieces[oppositeHouse] = 0;
 		_pieces[stealingHouse] = 0;
 		_pieces[getPlayerStore(stealEvent.stealingPlayerNumber, 0)] += seeds;
+
+	}
+
+	@Override
+	public void setEvents(Events events) {
+		_events = events;
+		
+		_events.listen(CommandEvent.class, this);
+		_events.listen(StealEvent.class, this);
+
 	}
 }

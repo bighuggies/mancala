@@ -1,6 +1,7 @@
 package display;
 
 import mancala.Board;
+import mancala.GameObject;
 import events.Events;
 import events.GameEndEvent;
 import events.GameEndListener;
@@ -10,17 +11,9 @@ import events.TurnEndEvent;
 import events.TurnEndListener;
 import events.GameEndEvent.Reason;
 
-public abstract class MancalaFormatter implements TurnEndListener,
+public abstract class MancalaFormatter implements GameObject, TurnEndListener,
 		GameStartListener, GameEndListener {
 	private Events _events;
-
-	public MancalaFormatter(Events events) {
-		this._events = events;
-
-		_events.listen(GameStartEvent.class, this);
-		_events.listen(GameEndEvent.class, this);
-		_events.listen(TurnEndEvent.class, this);
-	}
 
 	public void displayBoard(Board board) {
 		// override
@@ -44,5 +37,13 @@ public abstract class MancalaFormatter implements TurnEndListener,
 		if (event.reason == Reason.FINISHED) {
 			displayScores(event.boardState.getScores());
 		}
+	}
+	
+	public void setEvents(Events events) {
+		this._events = events;
+
+		_events.listen(GameStartEvent.class, this);
+		_events.listen(GameEndEvent.class, this);
+		_events.listen(TurnEndEvent.class, this);
 	}
 }

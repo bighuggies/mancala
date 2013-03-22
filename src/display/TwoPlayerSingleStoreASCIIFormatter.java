@@ -8,8 +8,7 @@ import events.Events;
 public class TwoPlayerSingleStoreASCIIFormatter extends MancalaFormatter {
 	private IO _io;
 
-	public TwoPlayerSingleStoreASCIIFormatter(Events events, IO io) {
-		super(events);
+	public TwoPlayerSingleStoreASCIIFormatter(IO io) {
 		this._io = io;
 	}
 
@@ -57,7 +56,7 @@ public class TwoPlayerSingleStoreASCIIFormatter extends MancalaFormatter {
 		_io.println(sb.toString());
 	}
 
-	public void printHorizontalBorder(int numPits) {
+	private void printHorizontalBorder(int numPits) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("+----+");

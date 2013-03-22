@@ -38,6 +38,7 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 
 	public void play(MockIO io) {
 		_events = new Events();
+		_io = io;
 
 		// Listen for game quit events, turn end events
 		_events.listen(TurnEndEvent.class, this);
@@ -45,9 +46,7 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 		_events.listen(GameEndEvent.class, this);
 		_events.listen(BadCommandEvent.class, this);
 
-		_board = new Board(_events);
-		_printer = new TwoPlayerSingleStoreASCIIFormatter(_events, io);
-		_io = io;
+		createGameObjects();
 
 		_players = new int[Config.NUM_PLAYERS];
 		_currentPlayer = 0;
@@ -58,6 +57,18 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 		while (_playing) {
 			nextTurn();
 		}
+	}
+	
+	private void createGameObjects() {
+		_board = new Board();
+		_printer = new TwoPlayerSingleStoreASCIIFormatter(_io);
+		
+		addGameObject(_board);
+		addGameObject(_printer);
+	}
+	
+	public void addGameObject(GameObject object) {
+		object.setEvents(_events);
 	}
 
 	private void nextTurn() {
@@ -89,7 +100,7 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 	private void overrideNextPlayer(int playerNumber) {
 		_nextPlayerOverride = playerNumber;
 	}
-
+	
 	@Override
 	public void onEndedInStore(EndedInStoreEvent event) {
 		overrideNextPlayer(event.playerNumber);
