@@ -3,12 +3,14 @@ package display;
 import mancala.Board;
 import mancala.Config;
 import utility.IO;
+import events.Events;
 
-public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
-	private IO io;
+public class TwoPlayerSingleStoreASCIIFormatter extends MancalaFormatter {
+	private IO _io;
 
-	public TwoPlayerSingleStoreASCIIFormatter(IO io) {
-		this.io = io;
+	public TwoPlayerSingleStoreASCIIFormatter(Events events, IO io) {
+		super(events);
+		this._io = io;
 	}
 
 	public void displayBoard(Board board) {
@@ -24,7 +26,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 	}
 
 	private void printPlayerDivider() {
-		io.println("|    |-------+-------+-------+-------+-------+-------|    |");
+		_io.println("|    |-------+-------+-------+-------+-------+-------|    |");
 	}
 
 	private void printPlayer2(String playerName, int[] playerHouses,
@@ -38,7 +40,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		}
 
 		sb.append(String.format(" %2d |", playerStore));
-		io.println(sb.toString());
+		_io.println(sb.toString());
 	}
 
 	private void printPlayer1(String playerName, int[] playerHouses,
@@ -52,7 +54,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		}
 
 		sb.append(String.format(" %s |", playerName));
-		io.println(sb.toString());
+		_io.println(sb.toString());
 	}
 
 	public void printHorizontalBorder(int numPits) {
@@ -65,7 +67,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		}
 
 		sb.append("----+");
-		io.println(sb.toString());
+		_io.println(sb.toString());
 	}
 
 	@Override
@@ -74,7 +76,7 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		int bestScore = 0;
 
 		for (int i = 0; i < scores.length; i++) {
-			io.println("\tplayer " + (i + 1) + ":" + scores[i]);
+			_io.println("\tplayer " + (i + 1) + ":" + scores[i]);
 
 			if (scores[i] > bestScore) {
 				bestScore = scores[i];
@@ -85,9 +87,9 @@ public class TwoPlayerSingleStoreASCIIFormatter implements MancalaFormatter {
 		}
 
 		if (winner == -1) {
-			io.println("A tie!");
+			_io.println("A tie!");
 		} else {
-			io.println("Player " + (winner + 1) + " wins!");
+			_io.println("Player " + (winner + 1) + " wins!");
 		}
 	}
 }

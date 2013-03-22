@@ -169,7 +169,7 @@ public class Board implements CommandListener, StealListener {
 				+ command.houseNumber, fromPlayer);
 
 		if (playerHousesEmpty(command.playerNumber)) {
-			_dispatcher.notify(new GameEndEvent(Reason.FINISHED));
+			_dispatcher.notify(new GameEndEvent(Reason.FINISHED, this));
 		}
 	}
 

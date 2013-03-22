@@ -10,6 +10,7 @@ import events.EndedInStoreEvent;
 import events.EndedInStoreListener;
 import events.Events;
 import events.GameEndEvent;
+import events.GameStartEvent;
 import events.GameEndEvent.Reason;
 import events.GameEndListener;
 import events.TurnEndEvent;
@@ -20,84 +21,73 @@ import events.TurnEndListener;
  */
 public class Mancala implements BadCommandListener, EndedInStoreListener,
 		TurnEndListener, GameEndListener {
-	public final Board board;
-	public final int[] players;
+	private Board _board;
+	private int[] _players;
+	private Events _events;
 
-	private MockIO io;
-	private Events dispatcher;
-	private MancalaFormatter printer;
-	private boolean playing = true;
-	private Reason gameEndReason;
+	private MockIO _io;
+	private MancalaFormatter _printer;
 
-	private int currentPlayer;
-	private int nextPlayerOverride = -1;
+	private boolean _playing = true;
+	private int _currentPlayer;
+	private int _nextPlayerOverride = -1;
 
 	public static void main(String[] args) {
 		new Mancala().play(new MockIO());
 	}
 
-	public Mancala() {
-		dispatcher = new Events();
+	public void play(MockIO io) {
+		_events = new Events();
 
 		// Listen for game quit events, turn end events
-		dispatcher.listen(TurnEndEvent.class, this);
-		dispatcher.listen(EndedInStoreEvent.class, this);
-		dispatcher.listen(GameEndEvent.class, this);
-		dispatcher.listen(BadCommandEvent.class, this);
+		_events.listen(TurnEndEvent.class, this);
+		_events.listen(EndedInStoreEvent.class, this);
+		_events.listen(GameEndEvent.class, this);
+		_events.listen(BadCommandEvent.class, this);
 
-		board = new Board(dispatcher);
+		_board = new Board(_events);
+		_printer = new TwoPlayerSingleStoreASCIIFormatter(_events, io);
+		_io = io;
 
-		players = new int[Config.NUM_PLAYERS];
-		currentPlayer = 0;
-	}
+		_players = new int[Config.NUM_PLAYERS];
+		_currentPlayer = 0;
 
-	public void play(MockIO io) {
-		printer = new TwoPlayerSingleStoreASCIIFormatter(io);
-		this.io = io;
-		this.printer.displayBoard(board);
+		_events.notify(new GameStartEvent(_board));
 
-		while (playing) {
+		// Play the game
+		while (_playing) {
 			nextTurn();
 		}
-
-		io.println("Game over");
-		printer.displayBoard(board);
-
-		if (gameEndReason == Reason.FINISHED) {
-			this.printer.displayScores(board.getScores());
-		}
 	}
 
-	public void nextTurn() {
-		String prompt = "Player " + (currentPlayer + 1)
+	private void nextTurn() {
+		String prompt = "Player " + (_currentPlayer + 1)
 				+ "'s turn - Specify house number or 'q' to quit: ";
-		int command = io.readInteger(prompt, 1, 6, -1, "q");
+		int command = _io.readInteger(prompt, 1, 6, -1, "q");
 
 		if (command == -1) {
-			dispatcher.notify(new GameEndEvent(Reason.QUITTING));
-			return;
+			_events.notify(new GameEndEvent(Reason.QUITTING, _board));
+		} else {
+			_events.notify(new CommandEvent(_currentPlayer, command));			
 		}
 
-		dispatcher.notify(new CommandEvent(currentPlayer, command));
-		dispatcher.notify(new TurnEndEvent(currentPlayer));
+		if (this._playing) {
+			_events.notify(new TurnEndEvent(_board, _currentPlayer));
+		}
 	}
 
-	public int getCurrentPlayer() {
-		return currentPlayer;
-	}
-
-	public int getNextPlayer(int currentPlayer) {
-		if (nextPlayerOverride != -1) {
-			int nextPlayer = nextPlayerOverride;
-			nextPlayerOverride = -1;
+	private int getNextPlayer(int currentPlayer) {
+		if (_nextPlayerOverride != -1) {
+			int nextPlayer = _nextPlayerOverride;
+			_nextPlayerOverride = -1;
 			return nextPlayer;
 		}
 
-		return (currentPlayer + 1) % this.players.length;
+		return (currentPlayer + 1) % this._players.length;
 	}
 
-	public void overrideNextPlayer(int playerNumber) {
-		nextPlayerOverride = playerNumber;
+	private void overrideNextPlayer(int playerNumber) {
+		_nextPlayerOverride = playerNumber;
 	}
 
 	@Override
@@ -107,21 +97,20 @@ public class Mancala implements BadCommandListener, EndedInStoreListener,
 
 	@Override
 	public void onTurnEnd(TurnEndEvent event) {
-		if (playing) {
-			currentPlayer = getNextPlayer(currentPlayer);
-			printer.displayBoard(board);
+		if (_playing) {
+			_currentPlayer = getNextPlayer(_currentPlayer);
 		}
 	}
 
 	@Override
 	public void onGameEnd(GameEndEvent event) {
-		this.playing = false;
-		gameEndReason = event.reason;
+		this._playing = false;
+		_io.println("Game over");
 	}
 
 	@Override
 	public void onBadCommand(BadCommandEvent badCommand) {
-		io.println("House is empty. Move again.");
+		_io.println("House is empty. Move again.");
 		overrideNextPlayer(badCommand.sourcePlayer);
 	}
 }
